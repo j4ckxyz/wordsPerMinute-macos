@@ -8,6 +8,62 @@ counting model goes to TheUthaGuy. This port is a native rewrite in Swift.
 
 It shows your live words per minute from typing in any app, right in the menu bar.
 
+## Install
+
+**Requirements:** macOS 15 or later, on Apple Silicon or Intel (universal app).
+
+### One-line install (recommended)
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/j4ckxyz/wordsPerMinute-macos/main/install.sh | bash
+```
+
+This downloads the latest release, checks its SHA-256 checksum, installs `WPM.app`
+to `/Applications` (or `~/Applications` if `/Applications` isn't writable), clears
+the quarantine flag so Gatekeeper doesn't block it, and opens it. Pin a version
+with `| bash -s -- --version v0.1.1`.
+
+### Or download the DMG
+
+1. Download `WPM-<version>.dmg` from the
+   [latest release](https://github.com/j4ckxyz/wordsPerMinute-macos/releases/latest).
+2. Open it and drag **WPM** onto **Applications**.
+3. WPM is ad-hoc signed and not notarised (there's no paid Apple Developer ID), so
+   macOS blocks the first launch. Either:
+   - right-click (Control-click) **WPM** in Applications → **Open** → **Open**, or
+   - try to open it once, then go to **System Settings → Privacy & Security** and
+     click **Open Anyway** next to "WPM was blocked…".
+
+   Or clear the quarantine flag from Terminal: `xattr -dr com.apple.quarantine /Applications/WPM.app`.
+
+### Allow Input Monitoring
+
+On first launch WPM opens a short onboarding window. Click **Open System Settings**,
+then switch **WPM** on under **Privacy & Security → Input Monitoring**. WPM starts
+counting within a second (use **Relaunch** if macOS insists). It needs Input
+Monitoring only, not Accessibility, and it never records what you type (see
+[Privacy](#features)).
+
+### Updating
+
+Run the one-line install command again to update to the latest release.
+Automatic in-app updates are coming in the next release.
+
+### Uninstall
+
+```sh
+# remove the app, keep your stats
+curl -fsSL https://raw.githubusercontent.com/j4ckxyz/wordsPerMinute-macos/main/install.sh | bash -s -- --uninstall
+# remove the app, stats, settings and the Input Monitoring entry
+curl -fsSL https://raw.githubusercontent.com/j4ckxyz/wordsPerMinute-macos/main/install.sh | bash -s -- --purge
+```
+
+Or by hand: quit WPM from its popover and delete `WPM.app` from Applications.
+Optionally delete `~/Library/Application Support/WPMBar` and run
+`tccutil reset ListenEvent local.wpmbar.WPMBar`. If you turned on launch at login,
+turn it off in Settings before deleting the app, or remove it under System
+Settings → General → Login Items.
+
 ## Screenshots
 
 | Menu bar | Popover | Settings | Onboarding |
@@ -19,61 +75,6 @@ granted, are in [`screenshots/`](screenshots). They were rendered by the app
 itself (`--render-snapshots`), with demo data (`--demo`). The macOS 15 tile style
 is shown, because Liquid Glass can't be drawn offscreen. The menu bar strip
 around the label is drawn by the renderer.
-
-## Install
-
-Needs macOS 15 or later. Runs on Apple Silicon and Intel (universal build).
-
-### One-line install
-
-While this repo is **private**, use the GitHub CLI. It needs `gh` installed and signed in
-to an account with access (`brew install gh && gh auth login`):
-
-```sh
-gh api repos/j4ckxyz/wordsPerMinute-macos/contents/install.sh -H "Accept: application/vnd.github.raw" | bash
-```
-
-Once the repo is **public**, plain curl works:
-
-```sh
-curl -fsSL https://raw.githubusercontent.com/j4ckxyz/wordsPerMinute-macos/main/install.sh | bash
-```
-
-`install.sh` downloads the latest release zip (with `gh` when it's signed in,
-otherwise with curl). It checks the SHA-256 checksum and installs `WPM.app` to
-`/Applications`, or to `~/Applications` if `/Applications` isn't writable. Then
-it clears the quarantine flag and opens the app. Pin a version with
-`| bash -s -- --version v0.1.0`.
-
-### DMG
-
-1. Download `WPM-<version>.dmg` from [Releases](https://github.com/j4ckxyz/wordsPerMinute-macos/releases)
-   (`gh release download --repo j4ckxyz/wordsPerMinute-macos --pattern '*.dmg'` while private).
-2. Open it and drag **WPM** onto **Applications**.
-3. WPM is ad-hoc signed, not notarised (there's no Developer ID), so the first
-   launch is blocked by Gatekeeper. Either:
-   - right-click (Control-click) **WPM** in Applications → **Open** → **Open**, or
-   - try to open it once, then go to **System Settings → Privacy & Security** and
-     click **Open Anyway** next to "WPM was blocked…".
-
-   Or clear the quarantine flag from Terminal: `xattr -dr com.apple.quarantine /Applications/WPM.app`.
-4. Allow **Input Monitoring** when the onboarding window asks.
-
-### Uninstall
-
-```sh
-# remove the app, keep your stats
-gh api repos/j4ckxyz/wordsPerMinute-macos/contents/install.sh -H "Accept: application/vnd.github.raw" | bash -s -- --uninstall
-# remove the app, stats, settings and the Input Monitoring entry
-gh api repos/j4ckxyz/wordsPerMinute-macos/contents/install.sh -H "Accept: application/vnd.github.raw" | bash -s -- --purge
-```
-
-(Swap in the `curl … | bash -s -- --uninstall` form once the repo is public.) Or by hand:
-quit WPM from its popover, delete `WPM.app` from Applications. Optionally delete
-`~/Library/Application Support/WPMBar` and run
-`tccutil reset ListenEvent local.wpmbar.WPMBar`. If you turned on launch at login,
-turn it off in Settings before deleting the app, or remove it under System
-Settings → General → Login Items.
 
 ## Features
 
@@ -115,11 +116,6 @@ The app icon is generated in code: `swift scripts/make-icon.swift Support/AppIco
 
 To cut a release: bump `VERSION`, run `./scripts/make-dmg.sh`, then
 `gh release create v$(cat VERSION) dist/*`.
-
-On first launch an onboarding window explains the permission. **Open System
-Settings** registers the app and opens Privacy & Security → Input Monitoring.
-Once you switch WPM on, the app starts counting within a second. If macOS insists,
-use the Relaunch button.
 
 Developer flags:
 
