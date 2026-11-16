@@ -2,27 +2,6 @@ import Charts
 import SwiftUI
 import WPMCore
 
-struct MenuBarLabel: View {
-    let model: AppModel
-
-    var body: some View {
-        if !model.permissionGranted && !model.monitorRunning {
-            Image(systemName: "keyboard.badge.exclamationmark")
-        } else {
-            let n = model.liveWPM
-            switch model.menuBarStyle {
-            case .numberAndUnit: Text("\(n) wpm").monospacedDigit()
-            case .numberOnly: Text("\(n)").monospacedDigit()
-            case .iconAndNumber:
-                HStack(spacing: 3) {
-                    Image(systemName: "keyboard")
-                    Text("\(n)").monospacedDigit()
-                }
-            }
-        }
-    }
-}
-
 struct PopoverView: View {
     @Bindable var model: AppModel
 

@@ -26,15 +26,22 @@ trap 'rm -rf "$WORK"' EXIT
 
 echo "==> Building $DMG"
 if command -v create-dmg >/dev/null; then
-  create-dmg --volname "$VOLNAME" --window-size 540 360 --icon-size 112 \
+  create-dmg --volname "$VOLNAME" --volicon Support/AppIcon.icns --window-size 540 360 --icon-size 112 \
     --icon "WPM.app" 140 170 --app-drop-link 400 170 --hide-extension "WPM.app" \
     --no-internet-enable "$DMG" "$APP"
 else
   ditto "$APP" "$STAGE/WPM.app"
   ln -s /Applications "$STAGE/Applications"
+  cp Support/AppIcon.icns "$STAGE/.VolumeIcon.icns"
   RW="$WORK/rw.dmg"
   hdiutil create -fs HFS+ -volname "$VOLNAME" -srcfolder "$STAGE" -format UDRW -ov "$RW"
   MOUNT="$(hdiutil attach -nobrowse -noautoopen -readwrite "$RW" | awk -F'\t' '/\/Volumes\//{print $NF}')"
+  # Use the app icon as the volume icon (custom-icon flag on the volume root).
+  if command -v SetFile >/dev/null; then
+    SetFile -a C "$MOUNT"
+  else
+    xattr -wx com.apple.FinderInfo "0000000000000000040000000000000000000000000000000000000000000000" "$MOUNT"
+  fi
   # Best effort: lay out the Finder window (needs a logged-in, unlocked GUI session
   # and Finder automation permission; skipped quietly otherwise).
   if osascript >/dev/null 2>&1 <<OSA

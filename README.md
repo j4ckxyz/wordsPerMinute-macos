@@ -1,5 +1,7 @@
 # WPM for macOS
 
+<img src="screenshots/app-icon.png" width="128" alt="WPM app icon">
+
 A macOS port of [TheUthaGuy/wordsPerMinute](https://github.com/TheUthaGuy/wordsPerMinute),
 a Windows typing-speed tracker written in Rust. Credit for the original idea and its
 counting model goes to TheUthaGuy. This port is a native rewrite in Swift.
@@ -76,6 +78,10 @@ Settings → General → Login Items.
 ## Features
 
 - **SwiftUI `MenuBarExtra`** (window style), `LSUIElement` agent with no Dock icon.
+- **Menu bar item:** a template gauge glyph that adapts to light, dark and tinted menu
+  bars. It shows the number while you type (`92 wpm`), is dimmed when idle, and gets
+  a badge dot while Input Monitoring isn't granted. Choose "icon + 72 wpm",
+  "icon + 72" or "icon only" in Settings.
 - **Same counting model as the original:** keys are classified as *character*,
   *separator* (space/return/tab) or *backspace*. WPM is the standard 5 typed
   characters per word, measured over a rolling 10 s window. Sessions end after 60 s
@@ -104,6 +110,8 @@ target is macOS 15.
 open build/WPM.app
 ./scripts/make-dmg.sh      # -> dist/WPM-<version>.dmg, dist/WPM-<version>.zip, dist/SHA256SUMS.txt
 ```
+
+The app icon is generated in code: `swift scripts/make-icon.swift Support/AppIcon.icns`.
 
 To cut a release: bump `VERSION`, run `./scripts/make-dmg.sh`, then
 `gh release create v$(cat VERSION) dist/*`.

@@ -29,6 +29,7 @@ rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 lipo -create "${slices[@]}" -output "$APP/Contents/MacOS/WPMBar"
 cp Support/Info.plist "$APP/Contents/Info.plist"
+cp Support/AppIcon.icns "$APP/Contents/Resources/AppIcon.icns"   # regenerate with: swift scripts/make-icon.swift Support/AppIcon.icns
 /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $VERSION" \
                         -c "Set :CFBundleVersion $BUILD_NUMBER" "$APP/Contents/Info.plist"
 

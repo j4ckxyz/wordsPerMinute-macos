@@ -81,28 +81,34 @@ enum SnapshotRenderer {
             write(SettingsView(model: model).frame(width: 316), scheme, dir, "3-settings-\(suffix)")
             write(OnboardingView(model: fresh), scheme, dir, "4-onboarding-\(suffix)")
             write(StatsView(model: fresh).frame(width: 316), scheme, dir, "5-popover-no-permission-\(suffix)")
-            write(MenuBarStrip(model: model), scheme, dir, "1-menubar-\(suffix)", background: false)
+            write(MenuBarStrip(), scheme, dir, "1-menubar-\(suffix)", background: false)
         }
     }
 
-    /// The label as it sits at the right end of the menu bar.
+    /// The label in each state, as it sits at the right end of a menu bar.
     private struct MenuBarStrip: View {
-        let model: AppModel
         @Environment(\.colorScheme) private var scheme
         var body: some View {
+            VStack(spacing: 0) {
+                row(.typing(wpm: 92), "typing")
+                row(.idle, "idle")
+                row(.needsPermission, "needs permission")
+            }
+        }
+
+        private func row(_ state: MenuBarState, _ caption: String) -> some View {
             HStack(spacing: 14) {
+                Text(caption).font(.system(size: 11, design: .monospaced)).foregroundStyle(.secondary)
                 Spacer()
-                MenuBarLabel(model: model)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 3)
-                    .background(Color.primary.opacity(0.12), in: RoundedRectangle(cornerRadius: 5))
+                MenuBarStateLabel(state: state, style: .iconNumberUnit)
+                    .padding(.horizontal, 6)
+                    .frame(height: 22)
                 Image(systemName: "wifi")
                 Image(systemName: "battery.100")
-                Text(Date.now.formatted(.dateTime.weekday(.abbreviated).day().month(.abbreviated).hour().minute()))
             }
             .font(.system(size: 13, weight: .medium))
             .padding(.horizontal, 12)
-            .frame(width: 420, height: 30)
+            .frame(width: 380, height: 30)
             .background(scheme == .dark ? Color(white: 0.16) : Color(white: 0.93))
         }
     }

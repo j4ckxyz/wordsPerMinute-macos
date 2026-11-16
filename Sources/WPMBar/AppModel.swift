@@ -4,13 +4,16 @@ import ServiceManagement
 import WPMCore
 
 enum MenuBarStyle: String, CaseIterable, Identifiable {
-    case numberAndUnit, numberOnly, iconAndNumber
+    // Raw values kept from 0.1.0 so saved preferences carry over.
+    case iconNumberUnit = "numberAndUnit"
+    case iconNumber = "numberOnly"
+    case iconOnly
     var id: String { rawValue }
     var label: String {
         switch self {
-        case .numberAndUnit: "72 wpm"
-        case .numberOnly: "72"
-        case .iconAndNumber: "⌨ 72"
+        case .iconNumberUnit: "Icon + 72 wpm"
+        case .iconNumber: "Icon + 72"
+        case .iconOnly: "Icon only"
         }
     }
 }
@@ -46,7 +49,7 @@ final class AppModel {
             ? StatsStore(url: FileManager.default.temporaryDirectory.appendingPathComponent("wpmbar-demo.json"))
             : StatsStore(url: StatsStore.defaultURL)
         engine = WPMEngine(history: demo ? [] : store.load())
-        menuBarStyle = MenuBarStyle(rawValue: UserDefaults.standard.string(forKey: "menuBarStyle") ?? "") ?? .numberAndUnit
+        menuBarStyle = MenuBarStyle(rawValue: UserDefaults.standard.string(forKey: "menuBarStyle") ?? "") ?? .iconNumberUnit
         if demo { seedDemo() }
     }
 
@@ -109,6 +112,12 @@ final class AppModel {
     // MARK: Derived values
 
     var liveWPM: Int { Int(engine.liveWPM(now: now).rounded()) }
+
+    var menuBarState: MenuBarState {
+        if !permissionGranted && !monitorRunning { return .needsPermission }
+        let wpm = liveWPM
+        return isIdle || wpm == 0 ? .idle : .typing(wpm: wpm)
+    }
     var isIdle: Bool { engine.isIdle(now: now) }
     var today: DayStats { engine.today }
     var sessionDuration: TimeInterval { engine.sessionDuration(now: now) }
